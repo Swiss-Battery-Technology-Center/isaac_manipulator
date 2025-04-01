@@ -1,20 +1,3 @@
-# SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
-# Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# SPDX-License-Identifier: Apache-2.0
-
 import launch
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
@@ -29,9 +12,13 @@ def generate_launch_description():
             default_value='base_link',
             description='The world frame of the robot'),
         DeclareLaunchArgument(
-            'target_frames',
-            default_value='["target1_frame", "target2_frame"]',
-            description='The list of target frames that the robot should plan towards'),
+            'home_frame',
+            default_value='home_frame',
+            description='home where robot should go'),
+        DeclareLaunchArgument(
+            'grasp_frame',
+            default_value='grasp_frame',
+            description='home where robot should go'),
         DeclareLaunchArgument(
             'plan_timer_period',
             default_value='0.01',
@@ -55,21 +42,23 @@ def generate_launch_description():
     ]
 
     world_frame = LaunchConfiguration('world_frame')
-    target_frames = LaunchConfiguration('target_frames')
+    home_frame = LaunchConfiguration('home_frame')
+    grasp_frame = LaunchConfiguration('grasp_frame')
     plan_timer_period = LaunchConfiguration('plan_timer_period')
     planner_group_name = LaunchConfiguration('planner_group_name')
     pipeline_id = LaunchConfiguration('pipeline_id')
     planner_id = LaunchConfiguration('planner_id')
     end_effector_link = LaunchConfiguration('end_effector_link')
 
-    pose_to_pose_node = Node(
+    home_node = Node(
         package='isaac_ros_moveit_goal_setter',
         namespace='',
-        executable='pose_to_pose_node',
-        name='pose_to_pose_node',
+        executable='home_node',
+        name='home_node',
         parameters=[{
             'world_frame': world_frame,
-            'target_frames': target_frames,
+            'home_frame': home_frame,
+            'grasp_frame': grasp_frame,
             'plan_timer_period': plan_timer_period,
             'planner_group_name': planner_group_name,
             'pipeline_id': pipeline_id,
@@ -79,4 +68,4 @@ def generate_launch_description():
         output='screen'
     )
 
-    return launch.LaunchDescription(launch_args + [pose_to_pose_node])
+    return launch.LaunchDescription(launch_args + [home_node])

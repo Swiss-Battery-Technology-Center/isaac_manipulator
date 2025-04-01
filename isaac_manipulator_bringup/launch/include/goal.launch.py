@@ -46,7 +46,7 @@ def generate_launch_description():
             description='The time in seconds for which the goal should request a plan'),
         DeclareLaunchArgument(
             'planner_group_name',
-            default_value='ur_manipulator',
+            default_value='manipulator',
             description='The MoveIt group name that the planner should plan for'),
         DeclareLaunchArgument(
             'pipeline_id',
@@ -58,7 +58,7 @@ def generate_launch_description():
             description='The MoveIt planner ID to use'),
         DeclareLaunchArgument(
             'end_effector_link',
-            default_value='wrist_3_link',
+            default_value='end_effector_link',
             description='The name of the end effector link for planning'),
     ]
 

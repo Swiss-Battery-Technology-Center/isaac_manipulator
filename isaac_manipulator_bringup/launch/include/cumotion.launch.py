@@ -203,17 +203,8 @@ def add_cumotion(args: lu.ArgumentContainer) -> List[Action]:
 
 
 def generate_launch_description() -> LaunchDescription:
-    default_urdf_file_path = os.path.join(
-        get_package_share_directory("isaac_ros_cumotion_robot_description"),
-        "urdf",
-        "ur5e_robotiq_2f_140.urdf",
-    )
-
-    default_xrdf_file_path = os.path.join(
-        get_package_share_directory("isaac_ros_cumotion_robot_description"),
-        "xrdf",
-        "ur5e_robotiq_2f_140.xrdf",
-    )
+    default_urdf_file_path = '/workspaces/cumotion/isaac_ros_cumotion/curobo_core/curobo/src/curobo/content/assets/robot/kinova/kinova_gen3_7dof.urdf'
+    default_xrdf_file_path = '/workspaces/cumotion/isaac_ros_cumotion/curobo_core/curobo/src/curobo/content/configs/robot/kinova_gen3.yml'
 
     args = lu.ArgumentContainer()
     args.add_arg('camera_type')
@@ -268,7 +259,7 @@ def generate_launch_description() -> LaunchDescription:
     args.add_arg(
         'tool_frame',
         cli=True,
-        default='wrist_3_link',
+        default='tool_frame',
         description='The tool frame of the robot')
     args.add_arg(
         'read_esdf_world',

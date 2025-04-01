@@ -23,144 +23,63 @@ import isaac_ros_launch_utils as lu
 from isaac_manipulator_ros_python_utils.types import CameraType, TrackingType
 
 # Dictionary containing the calibration of various camera setups.
-# Every item of the dictionary represents the calibration of a single setup
 calibrations_dict = {
-    'hubble_test_bench': {
-        'world_to_hawk': {
-            'parent_frame': 'world',
-            'child_frame': 'hawk',
-            'translation': [-1.75433, -0.0887958, 0.419998],
-            'rotation': [-0.00447052, 0.138631, -0.0101076, 0.990282],  # [qx, qy ,qz, qw]
-        },
-        'world_to_realsense_1': {
-            'parent_frame': 'world',
-            'child_frame': 'camera_1_link',
-            'translation': [-1.51812, 0.321693, 0.567912],
-            'rotation': [0.0271786, 0.171242, -0.36313, 0.915464],  # [qx, qy ,qz, qw]
-        },
-        'world_to_realsense_2': {
-            'parent_frame': 'world',
-            'child_frame': 'camera_2_link',
-            'translation': [-1.47782, -1.23458, 0.533205],
-            'rotation': [-0.0636737, 0.206499, 0.343712, 0.913874],  # [qx, qy ,qz, qw]
-        },
+    'test': {
         'world_to_base_link': {
             'parent_frame': 'world',
             'child_frame': 'base_link',
             'translation': [0.0, 0.0, 0.0],
             'rotation': [0.0, 0.0, 0.0, 1.0],  # [qx, qy ,qz, qw]
         },
-        'object_to_grasp_frame': {
-            'parent_frame': 'detected_object1',
-            'child_frame': 'goal_frame',
-            'translation': [0.043, 0.359, 0.065],
-            'rotation': [0.553, 0.475, -0.454, 0.513],  # [qx, qy ,qz, qw]
+        'world_pose_realsense_camera_intermediate': {
+            'parent_frame': 'world',
+            'child_frame': 'camera_intermediate',
+            'translation': [0.7723, 0.4918, 0.9027],
+            'rotation': [0.3511, 0.8570, -0.3616, -0.1073],  # [qx, qy, qz, qw]
+        },
+        'world_pose_realsense_camera_intermediate1': {
+            'parent_frame': 'camera_intermediate',
+            'child_frame': 'camera_intermediate1',
+            'translation': [0.0, 0.0, 0.0],
+            'rotation': [0.0, 0.0, 0.707168, 0.707168],  # [qx, qy, qz, qw]
+        },
+        'world_pose_realsense_camera_intermediate2': {
+            'parent_frame': 'camera_intermediate1',
+            'child_frame': 'camera_intermediate2',
+            'translation': [0.0, 0.0, 0.0],
+            'rotation': [0.707168, 0.0, 0.707168, 0.0],  # [qx, qy, qz, qw]
+        },
+        'world_to_realsense_1': {
+            'parent_frame': 'camera_intermediate2',
+            'child_frame': 'camera_1_link',
+            'translation': [0.0, 0.0, 0.0],
+            'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
         },
         'world_to_target_frame_1': {
             'parent_frame': 'world',
             'child_frame': 'target1_frame',
-            'translation': [-0.7, 0.3, 0.4],
+            'translation': [0.3, 0.3, 0.15],
             'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
         },
         'world_to_target_frame_2': {
             'parent_frame': 'world',
             'child_frame': 'target2_frame',
-            'translation': [-0.7, -0.3, 0.4],
+            'translation': [0.3, -0.3, 0.15],
             'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
         },
     },
-    'zurich_test_bench': {
-        'world_to_hawk': {
-            'parent_frame': 'world',
-            'child_frame': 'hawk',
-            'translation': [-0.646121, 0.634906, 0.657998],
-            'rotation': [0.0647987, 0.0853649, -0.5974046, 0.794747],  # [qx, qy ,qz, qw]
-        },
-        'world_to_realsense_1': {
-            'parent_frame': 'world',
-            'child_frame': 'camera_1_link',
-            'translation': [2.131679, 0.563435, 0.775389],
-            'rotation': [-0.324828, 0.001799, 0.945766, -0.002907],  # [qx, qy ,qz, qw]
-        },
-        'world_to_realsense_2': {
-            'parent_frame': 'world',
-            'child_frame': 'camera_2_link',
-            'translation': [-0.250322, 0.598947, 0.864349],
-            'rotation': [0.039936, 0.349054, -0.058430, 0.934426],  # [qx, qy ,qz, qw]
-        },
+    'home': {
         'world_to_base_link': {
             'parent_frame': 'world',
             'child_frame': 'base_link',
             'translation': [0.0, 0.0, 0.0],
             'rotation': [0.0, 0.0, 0.0, 1.0],  # [qx, qy ,qz, qw]
         },
-        'object_to_grasp_frame': {
-            'parent_frame': 'detected_object1',
-            'child_frame': 'goal_frame',
-            'translation': [0.043, 0.359, 0.065],
-            'rotation': [0.553, 0.475, -0.454, 0.513],  # [qx, qy ,qz, qw]
-        },
-        'world_to_target_frame_1': {
+        'home': {
             'parent_frame': 'world',
-            'child_frame': 'target1_frame',
-            'translation': [-0.7, 0.3, 0.4],
-            'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
-        },
-        'world_to_target_frame_2': {
-            'parent_frame': 'world',
-            'child_frame': 'target2_frame',
-            'translation': [-0.7, -0.3, 0.4],
-            'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
-        },
-    },
-    'hubble_ur5e_test_bench': {
-        'world_to_base_link': {
-            'parent_frame': 'world',
-            'child_frame': 'base_link',
-            'translation': [0.0, 0.0, 0.0],
-            'rotation': [0.0, 0.0, 0.0, 1.0],  # [qx, qy ,qz, qw]
-        },
-        'world_to_hawk': {
-            'parent_frame': 'world',
-            'child_frame': 'hawk',
-            'translation': [-0.646121, 0.634906, 0.657998],
-            'rotation': [0.0647987, 0.0853649, -0.597404, 0.794747],  # [qx, qy ,qz, qw]
-        },
-        'world_to_hawk_2': {
-            'parent_frame': 'world',
-            'child_frame': 'hawk_2',
-            'translation': [0.00717077, 0.73, 0.524834],
-            'rotation': [-0.09738, -0.0599994, 0.870336, -0.478991],  # [qx, qy ,qz, qw]
-        },
-        'world_to_realsense_2': {
-            'parent_frame': 'world',
-            'child_frame': 'camera_2_link',
-            'translation': [0.0442943, 0.821461, 0.521577],
-            'rotation': [-0.103339, -0.0650548, 0.881767, -0.455604],  # [qx, qy ,qz, qw]
-        },
-        'world_to_realsense_1': {
-            'parent_frame': 'world',
-            'child_frame': 'camera_1_link',
-            'translation': [-1.3285, 0.563134, 0.383402],
-            'rotation': [0.0157158, 0.01767, -0.308705, 0.950864],  # [qx, qy ,qz, qw]
-        },
-        'object_to_grasp_frame': {
-            'parent_frame': 'detected_object1',
-            'child_frame': 'goal_frame',
-            'translation': [0.043, 0.359, 0.065],
-            'rotation': [0.553, 0.475, -0.454, 0.513],  # [qx, qy ,qz, qw]
-        },
-        'world_to_target_frame_1': {
-            'parent_frame': 'world',
-            'child_frame': 'target1_frame',
-            'translation': [-0.7, 0.3, 0.4],
-            'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
-        },
-        'world_to_target_frame_2': {
-            'parent_frame': 'world',
-            'child_frame': 'target2_frame',
-            'translation': [-0.7, -0.3, 0.4],
-            'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
+            'child_frame': 'home_frame',
+            'translation': [0.2799, 0.23077, 0.3283],
+            'rotation': [0.8703, 0.43052, 0.049201, 0.23412],  # [qx, qy ,qz, qw]
         },
     },
 }
@@ -171,66 +90,102 @@ def static_transform_from_dict(transform_dict):
         parent=transform_dict['parent_frame'],
         child=transform_dict['child_frame'],
         translation=transform_dict['translation'],
-        orientation_quaternion=transform_dict['rotation'])
+        orientation_quaternion=transform_dict['rotation']
+    )
 
 
 def add_static_transforms(args: lu.ArgumentContainer) -> List[Action]:
-    camera_type = CameraType[args.camera_type]
-    tracking_type = TrackingType[args.tracking_type]
+    """
+    If `camera_type` is empty (''), skip camera transforms entirely.
+    Otherwise, if camera_type is hawk or realsense, load the respective transforms.
+    """
+
+    # Access the arguments
+    camera_type_str = args.camera_type  # might be empty
+    tracking_type_str = args.tracking_type
     num_cameras = int(args.num_cameras)
     broadcast_world_base_link = bool(args.broadcast_world_base_link)
 
-    # Get the calibration dict
-    if args.calibration_name not in calibrations_dict:
+    calibration_name = args.calibration_name
+    if calibration_name not in calibrations_dict:
         return [
             lu.log_info([
-                "Calibration with name '",
-                str(args.calibration_name), "' does not exits. Not loading static transforms."
+                f"Calibration '{calibration_name}' not found. Not loading static transforms."
             ])
         ]
-    transforms = calibrations_dict[args.calibration_name]
 
-    actions = []
-    # Get world transform
-    if broadcast_world_base_link:
+    transforms = calibrations_dict[calibration_name]
+    actions: List[Action] = []
+
+    # If broadcast_world_base_link, publish the base_link transform
+    if broadcast_world_base_link and 'world_to_base_link' in transforms:
         actions.append(static_transform_from_dict(transforms['world_to_base_link']))
 
-    # Get camera transforms
-    if camera_type is CameraType.hawk:
-        actions.append(static_transform_from_dict(transforms['world_to_hawk']))
-    elif camera_type is CameraType.realsense:
-        actions.append(static_transform_from_dict(transforms['world_to_realsense_1']))
-        if num_cameras > 1:
-            actions.append(static_transform_from_dict(transforms['world_to_realsense_2']))
-            assert num_cameras <= 2, 'Running more than 2 cameras not allowed.'
-    else:
-        raise Exception(f'CameraType {camera_type} not implemented.')
+    # Optional: If you also want to always broadcast other frames (like 'home'), do that:
+    if 'home' in transforms:
+        actions.append(static_transform_from_dict(transforms['home']))
 
-    # Get target and grasp frames
-    if tracking_type is TrackingType.follow_object:
-        actions.append(static_transform_from_dict(transforms['object_to_grasp_frame']))
-    elif tracking_type is TrackingType.pose_to_pose:
-        actions.append(static_transform_from_dict(transforms['world_to_target_frame_1']))
-        actions.append(static_transform_from_dict(transforms['world_to_target_frame_2']))
-    elif tracking_type is not TrackingType.none:
-        raise Exception(f'TrackingType {tracking_type} not implemented.')
+    # If camera_type is empty or not recognized => skip camera transforms
+    if camera_type_str:
+        # Convert string to enum
+        camera_type_enum = CameraType[camera_type_str]
 
+        # If camera is hawk
+        if camera_type_enum is CameraType.hawk:
+            # Ensure the transforms are in the dictionary or skip
+            if 'world_to_hawk' in transforms:
+                actions.append(static_transform_from_dict(transforms['world_to_hawk']))
+            else:
+                actions.append(lu.log_info(["No hawk transforms found in dict. Skipping."]))
+
+        # If camera is realsense
+        elif camera_type_enum is CameraType.realsense:
+            # Attempt to load realsense transforms if they exist
+            realsense_keys = [
+                'world_pose_realsense_camera_intermediate',
+                'world_pose_realsense_camera_intermediate1',
+                'world_pose_realsense_camera_intermediate2',
+                'world_to_realsense_1',
+                'world_to_target_frame_1',
+                'world_to_target_frame_2'
+            ]
+            for key in realsense_keys:
+                if key in transforms:
+                    actions.append(static_transform_from_dict(transforms[key]))
+                else:
+                    actions.append(lu.log_info([f"Transform '{key}' not found. Skipping."]))
+
+            # If 2 cameras, also load 'world_to_realsense_2' if present
+            if num_cameras > 1:
+                if 'world_to_realsense_2' in transforms:
+                    actions.append(static_transform_from_dict(transforms['world_to_realsense_2']))
+                else:
+                    actions.append(lu.log_info(["'world_to_realsense_2' not found. Skipping."]))
+                assert num_cameras <= 2, 'Running more than 2 cameras not allowed.'
+        else:
+            # If for some reason there's another camera type we haven't covered
+            actions.append(lu.log_info([
+                f"CameraType {camera_type_enum} not recognized in static transforms. Skipping."
+            ]))
+
+    # Always log success
     actions.append(
         lu.log_info([
-            "Successfully loaded the static transforms of the '",
-            str(args.calibration_name),
-            "' calibration.",
-        ]))
+            f"Successfully loaded the static transforms for calibration '{calibration_name}'."
+        ])
+    )
     return actions
 
 
 def generate_launch_description() -> LaunchDescription:
+    # Here, we default camera_type to '' so if user doesn't specify it, no camera transforms are loaded
     args = lu.ArgumentContainer()
     args.add_arg('num_cameras', 1)
     args.add_arg('broadcast_world_base_link', False)
-    args.add_arg('camera_type')
-    args.add_arg('tracking_type')
+    args.add_arg('camera_type', '')       # Default is empty => no camera transforms
+    args.add_arg('tracking_type', 'pose_to_pose')
     args.add_arg('calibration_name', '')
 
+    # Use an opaque function to build the transforms
     args.add_opaque_function(add_static_transforms)
     return LaunchDescription(args.get_launch_actions())

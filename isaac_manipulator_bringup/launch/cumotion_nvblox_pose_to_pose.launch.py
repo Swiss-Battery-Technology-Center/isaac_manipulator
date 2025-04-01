@@ -147,12 +147,8 @@ def generate_launch_description() -> lut.LaunchDescription:
             'isaac_manipulator_bringup',
             'launch/include/static_transforms.launch.py',
             launch_arguments={
-                'camera_type': args.camera_type,
-                'num_cameras': args.num_cameras,
                 'tracking_type': TrackingType.pose_to_pose,
-                'calibration_name': args.setup,
-                'broadcast_world_base_link': args.no_robot_mode,
-            },
+                'calibration_name': args.setup,            },
         ))
 
     # Visualization
@@ -162,8 +158,7 @@ def generate_launch_description() -> lut.LaunchDescription:
             'launch/visualization/visualization.launch.py',
             launch_arguments={'camera_type': args.camera_type}))
 
-    # Component container
     actions.append(
         lu.component_container(constants.MANIPULATOR_CONTAINER_NAME, log_level=args.log_level))
-
+    
     return lut.LaunchDescription(actions)
