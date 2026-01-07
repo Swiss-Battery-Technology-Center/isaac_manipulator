@@ -8,21 +8,21 @@
 /**:
   ros__parameters:
     # miscellaneous
-    voxel_size: 0.05
+    voxel_size: 0.01
     num_cameras: 1
     input_qos: "SENSOR_DATA"
-    global_frame: "base"
+    global_frame: "base_link"
 
     # Parameters governing frequency of different processing steps in the reconstruction pipeline.
     # Processing happens every n:th tick_period. <=0 means that no processing take place
     tick_period_ms: 10
     integrate_depth_rate_hz: 40.0
     integrate_color_rate_hz: 5.0
-    update_mesh_rate_hz: 1.0
-    update_esdf_rate_hz: 1.0  # Esdf is updated on EsdfAndGradients service request.
-    publish_layer_rate_hz: 1.0  # Esdf is visualized on EsdfAndGradients service request.
-    decay_tsdf_rate_hz: 1.0 # Turn off decay. No big impact with static cameras and constant weighting.
-    clear_map_outside_radius_rate_hz: 1.0
+    update_mesh_rate_hz: 0.0
+    update_esdf_rate_hz: 0.0 # Esdf is updated on EsdfAndGradients service request.
+    publish_layer_rate_hz: 0.0 # Esdf is visualized on EsdfAndGradients service request.
+    decay_tsdf_rate_hz: 0.0 # Turn off decay. No big impact with static cameras and constant weighting.
+    clear_map_outside_radius_rate_hz: 0.0
 
     # esdf settings
     esdf_mode: "3d" # ["2d", "3d"]
@@ -35,7 +35,7 @@
     static_mapper:
       # projective integrator (tsdf/color/occupancy)
       projective_integrator_weighting_mode: "constant" # Chosen to increase reactivity further away from camera.
-      projective_integrator_max_weight: 10.0 # Temporal fusion of the 5 last frames (assuming constant weighting).
+      projective_integrator_max_weight: 5.0 # Temporal fusion of the 5 last frames (assuming constant weighting).
       projective_tsdf_integrator_invalid_depth_decay_factor: 0.8 # Decay voxels projecting to pixels that are masked or invalid.
 
       # view calculator

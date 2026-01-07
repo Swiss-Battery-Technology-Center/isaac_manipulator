@@ -25,17 +25,17 @@ from isaac_manipulator_ros_python_utils.types import CameraType, TrackingType
 # Dictionary containing the calibration of various camera setups.
 calibrations_dict = {
     'test': {
-        'world_to_base_link': {
+        'world_to_base': {
             'parent_frame': 'world',
-            'child_frame': 'base_link',
+            'child_frame': 'base',
             'translation': [0.0, 0.0, 0.0],
             'rotation': [0.0, 0.0, 0.0, 1.0],  # [qx, qy ,qz, qw]
         },
         'world_pose_realsense_camera_intermediate': {
             'parent_frame': 'world',
             'child_frame': 'camera_intermediate',
-            'translation': [0.7275, -0.0864, 0.9423],
-            'rotation': [0.7494, 0.6317, -0.1365, -0.1439],  # [qx, qy, qz, qw]
+            'translation': [0.6587, 0.5796, 0.6788], 
+            'rotation': [0.2548, 0.8413, -0.4647, -0.1065], # [qx, qy, qz, qw]
         },
         'world_pose_realsense_camera_intermediate1': {
             'parent_frame': 'camera_intermediate',
@@ -55,23 +55,11 @@ calibrations_dict = {
             'translation': [0.0, 0.0, 0.0],
             'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
         },
-        'world_to_target_frame_1': {
-            'parent_frame': 'world',
-            'child_frame': 'target1_frame',
-            'translation': [0.45, -0.30, 0.07],
-            'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
-        },
-        'world_to_target_frame_2': {
-            'parent_frame': 'world',
-            'child_frame': 'target2_frame',
-            'translation': [0.45, 0.28, 0.07],
-            'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
-        },
     },
     'home': {
-        'world_to_base_link': {
+        'world_to_base': {
             'parent_frame': 'world',
-            'child_frame': 'base_link',
+            'child_frame': 'base',
             'translation': [0.0, 0.0, 0.0],
             'rotation': [0.0, 0.0, 0.0, 1.0],  # [qx, qy ,qz, qw]
         },
@@ -104,7 +92,7 @@ def add_static_transforms(args: lu.ArgumentContainer) -> List[Action]:
     camera_type_str = args.camera_type  # might be empty
     tracking_type_str = args.tracking_type
     num_cameras = int(args.num_cameras)
-    broadcast_world_base_link = bool(args.broadcast_world_base_link)
+    broadcast_world_base = bool(args.broadcast_world_base)
 
     calibration_name = args.calibration_name
     if calibration_name not in calibrations_dict:
@@ -117,9 +105,9 @@ def add_static_transforms(args: lu.ArgumentContainer) -> List[Action]:
     transforms = calibrations_dict[calibration_name]
     actions: List[Action] = []
 
-    # If broadcast_world_base_link, publish the base_link transform
-    if broadcast_world_base_link and 'world_to_base_link' in transforms:
-        actions.append(static_transform_from_dict(transforms['world_to_base_link']))
+    # If broadcast_world_base, publish the base transform
+    if broadcast_world_base and 'world_to_base' in transforms:
+        actions.append(static_transform_from_dict(transforms['world_to_base']))
 
     # Optional: If you also want to always broadcast other frames (like 'home'), do that:
     if 'home' in transforms:
@@ -181,7 +169,7 @@ def generate_launch_description() -> LaunchDescription:
     # Here, we default camera_type to '' so if user doesn't specify it, no camera transforms are loaded
     args = lu.ArgumentContainer()
     args.add_arg('num_cameras', 1)
-    args.add_arg('broadcast_world_base_link', True)
+    args.add_arg('broadcast_world_base', True)
     args.add_arg('camera_type', '')       # Default is empty => no camera transforms
     args.add_arg('tracking_type', 'pose_to_pose')
     args.add_arg('calibration_name', '')

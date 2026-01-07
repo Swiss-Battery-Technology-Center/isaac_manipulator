@@ -27,14 +27,28 @@ calibrations_dict = {
         'home': {
             'parent_frame': 'world',
             'child_frame': 'home_frame',
-            'translation': [0.2799, 0.23077, 0.3283],
-            'rotation': [0.8703, 0.43052, 0.049201, 0.23412],
+            'translation': [0.13808, 0.004505, 0.51433],
+            'rotation': [0.70335, 0.70181, 0.089203, 0.069305],
         },
         'camera': {
             'parent_frame': 'end_effector_link',
             'child_frame': 'camera_link',
-            'translation': [0.0154, 0.0862, -0.0544],
-            'rotation': [0.0210, -0.0461, 0.9979, 0.0399],
+            'translation': [0.0348, 0.0460, 0.0651],
+            'rotation': [-0.0051, 0.0003, 0.9993, -0.0375],
+        },
+        'post_grasp_lift': {
+            'parent_frame': 'base_link', # Define relative to base_link
+            'child_frame': 'post_grasp_lift_frame',
+             # USE THE FIRST IMAGE'S VALUES (Position, Orientation xyzw)
+            'translation': [0.27914, 0.14424, 0.45736],
+            'rotation': [0.60482, 0.52133, 0.47815, 0.36576], # x, y, z, w
+        },
+        'drop_off': {
+            'parent_frame': 'base_link', # Define relative to base_link
+            'child_frame': 'drop_off_frame',
+             # USE THE SECOND IMAGE'S VALUES (Position, Orientation xyzw)
+            'translation': [0.32895, 0.52452, 0.41249],
+            'rotation': [0.6815, 0.62578, 0.17843, 0.33486], # x, y, z, w
         },
     },
     'test': {
@@ -63,6 +77,11 @@ calibrations_dict = {
 # 3) Utility: create static transform from a dict
 ##############################################################################
 def static_transform_from_dict(transform_dict):
+    # Check if required keys exist
+    if not all(k in transform_dict for k in ['parent_frame', 'child_frame', 'translation', 'rotation']):
+        lu.log_warn(f"Skipping transform definition due to missing keys: {transform_dict}")
+        return None
+
     return lu.static_transform(
         parent=transform_dict['parent_frame'],
         child=transform_dict['child_frame'],
@@ -70,22 +89,6 @@ def static_transform_from_dict(transform_dict):
         orientation_quaternion=transform_dict['rotation']
     )
 
-##############################################################################
-# 4) Utility to convert 3x3 to quaternion
-##############################################################################
-def matrix_to_quaternion(R: np.ndarray):
-    """Convert a 3x3 rotation matrix to [qx, qy, qz, qw]."""
-    qw = 0.5 * math.sqrt(max(0, 1 + R[0,0] + R[1,1] + R[2,2]))
-    qx = 0.5 * math.sqrt(max(0, 1 + R[0,0] - R[1,1] - R[2,2]))
-    qy = 0.5 * math.sqrt(max(0, 1 - R[0,0] + R[1,1] - R[2,2]))
-    qz = 0.5 * math.sqrt(max(0, 1 - R[0,0] - R[1,1] + R[2,2]))
-
-    # Determine sign of qx,qy,qz from off-diagonal elements:
-    if (R[2,1] - R[1,2]) < 0: qx = -qx
-    if (R[0,2] - R[2,0]) < 0: qy = -qy
-    if (R[1,0] - R[0,1]) < 0: qz = -qz
-
-    return [qx, qy, qz, qw]
 
 ##############################################################################
 # 5) Load standard transforms from dictionary
@@ -96,69 +99,35 @@ def add_robot_transforms() -> List[Action]:
     (Or 'test', or both. Adjust as you wish.)
     """
     actions: List[Action] = []
+    calibration_name = 'home' # Or make this configurable if needed
 
-    # Let's assume we always load 'home' transforms:
-    if 'home' not in calibrations_dict:
-        actions.append(lu.log_info(["No 'home' calibration found, skipping."]))
+    if calibration_name not in calibrations_dict:
+        actions.append(lu.log_info([f"No '{calibration_name}' calibration found, skipping."]))
         return actions
 
-    transforms = calibrations_dict['home']
+    transforms = calibrations_dict[calibration_name]
+    loaded_transforms = []
 
-    if 'camera' in transforms:
-        actions.append(static_transform_from_dict(transforms['camera']))
+    # List of transforms to load for the 'home' setup
+    transform_keys = ['world_to_base_link', 'home', 'post_grasp_lift', 'drop_off', 'camera']
+    # Optional: Add 'camera' back if needed: transform_keys.append('camera')
 
-    # broadcast world->base_link
-    if 'world_to_base_link' in transforms:
-        actions.append(static_transform_from_dict(transforms['world_to_base_link']))
 
-    # broadcast home (world->home_frame)
-    if 'home' in transforms:
-        actions.append(static_transform_from_dict(transforms['home']))
+    for key in transform_keys:
+        if key in transforms:
+            tf_action = static_transform_from_dict(transforms[key])
+            if tf_action:
+                actions.append(tf_action)
+                loaded_transforms.append(transforms[key]['child_frame'])
+        else:
+            actions.append(lu.log_warn([f"Transform key '{key}' not found in '{calibration_name}' calibration."]))
+
 
     actions.append(
-        lu.log_info(["Loaded the 'home' dictionary transforms (world->base_link, home_frame)."])
+        lu.log_info([f"Loaded '{calibration_name}' dictionary transforms for frames: {loaded_transforms}."])
     )
     return actions
 
-##############################################################################
-# 6) Also load the best_grasp_in_base.npy if it exists, broadcast base->best_grasp_frame
-##############################################################################
-def add_best_grasp_transform() -> List[Action]:
-    actions: List[Action] = []
-
-    if os.path.exists(BEST_GRASP_NPY_PATH):
-        T_base_grasp = np.load(BEST_GRASP_NPY_PATH)
-        if T_base_grasp.shape == (4,4):
-            # Extract translation
-            tx, ty, tz = T_base_grasp[0:3, 3]
-            # Extract rotation
-            R = T_base_grasp[:3, :3]
-            q = matrix_to_quaternion(R)
-
-            actions.append(
-                lu.static_transform(
-                    parent='camera_link',     # or 'world', if you prefer
-                    child='grasp_frame',
-                    translation=[float(tx), float(ty), float(tz)],
-                    orientation_quaternion=[float(q[0]), float(q[1]), float(q[2]), float(q[3])]
-                )
-            )
-            actions.append(
-                lu.log_info([
-                    f"Loaded best_grasp_in_base from {BEST_GRASP_NPY_PATH} "
-                    "and broadcasting base_link->grasp_frame"
-                ])
-            )
-        else:
-            actions.append(lu.log_info([
-                f"Warning: {BEST_GRASP_NPY_PATH} not a 4x4. shape={T_base_grasp.shape}"
-            ]))
-    else:
-        actions.append(lu.log_info([
-            f"No file found at '{BEST_GRASP_NPY_PATH}' => skipping grasp_frame."
-        ]))
-
-    return actions
 
 ##############################################################################
 # 7) Put it all together
@@ -169,7 +138,5 @@ def generate_launch_description() -> LaunchDescription:
     # 1) Load the dictionary transforms for "home"
     actions.extend(add_robot_transforms())
 
-    # 2) Load the best_grasp_in_base.npy if present
-    actions.extend(add_best_grasp_transform())
 
     return LaunchDescription(actions)

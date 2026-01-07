@@ -113,8 +113,8 @@ def add_cumotion(args: lu.ArgumentContainer) -> List[Action]:
                         args.publish_curobo_world_as_voxels,
                     'cumotion_planner.override_moveit_scaling_factors': 'True',
                     'cumotion_planner.joint_states_topic': args.joint_states_topic,
-                    'cumotion_planner.voxel_size': '0.01',
-                    'cumotion_planner.publish_voxel_size': '0.01',
+                    'cumotion_planner.voxel_size': '0.05',
+                    'cumotion_planner.publish_voxel_size': '0.05',
                     'cumotion_planner.update_link_sphere_server':
                         args.update_link_sphere_server_planner,
                     'cumotion_planner.urdf_path': args.urdf_file_path,
@@ -203,8 +203,8 @@ def add_cumotion(args: lu.ArgumentContainer) -> List[Action]:
 
 
 def generate_launch_description() -> LaunchDescription:
-    default_urdf_file_path = '/workspaces/cumotion/isaac_ros_cumotion/curobo_core/curobo/src/curobo/content/assets/robot/kinova/kinova_gen3_7dof.urdf'
-    default_xrdf_file_path = '/workspaces/cumotion/isaac_ros_cumotion/curobo_core/curobo/src/curobo/content/configs/robot/kinova_gen3.yml'
+    default_urdf_file_path = '/workspaces/cumotion/isaac_ros_cumotion/franka_description/robots/fr3/fr3.urdf'
+    default_xrdf_file_path = '/workspaces/cumotion/isaac_ros_cumotion/franka_description/fr3.xrdf'
 
     args = lu.ArgumentContainer()
     args.add_arg('camera_type')
@@ -232,7 +232,7 @@ def generate_launch_description() -> LaunchDescription:
     args.add_arg(
         'distance_threshold',
         cli=True,
-        default='0.15',
+        default='0.05',
         description='Maximum distance from a given collision sphere (in meters) at which'
                     'to mask points in the robot segmenter'
     )

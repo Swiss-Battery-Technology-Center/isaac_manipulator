@@ -81,21 +81,60 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[lut.Action]:
     elif camera_type is CameraType.isaac_sim:
         assert num_cameras == 1, 'Running multiple cameras in Isaac Sim not allowed.'
 
-    # Get config files
-    base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_base.yaml')
-    manipulator_base_config = lu.get_path('isaac_manipulator_bringup',
-                                          'config/nvblox/nvblox_manipulator_base.yaml')
-    hawk_config = lu.get_path('isaac_manipulator_bringup',
-                              'config/nvblox/specializations/nvblox_manipulator_hawk.yaml')
-    realsense_config = lu.get_path(
-        'isaac_manipulator_bringup',
-        'config/nvblox/specializations/nvblox_manipulator_realsense.yaml')
-    isaac_sim_config = lu.get_path('isaac_manipulator_bringup',
-                                   'config/nvblox/specializations/nvblox_manipulator_sim.yaml')
-    workspace_config = lu.get_path('isaac_manipulator_bringup',
-                                   f'config/nvblox/workspace_bounds/{workspace_bounds_name}.yaml')
+    # --- DEBUGGING START: Explicitly print every path ---
+    print("\n" + "="*50)
+    print("DEBUG: Starting Nvblox Configuration Load")
+    print("="*50)
 
-    # Get remappings and specialized parameters
+    # 1. Load Base Config
+    base_config = None
+    try:
+        base_config = lu.get_path('nvblox_examples_bringup', 'config/nvblox/nvblox_base.yaml')
+        print(f"DEBUG: Found base_config (examples): {base_config}")
+    except:
+        print("DEBUG: Could not find nvblox_examples_bringup.")
+
+    if base_config is None:
+        try:
+            base_config = lu.get_path('isaac_ros_nvblox', 'config/nvblox/nvblox_base.yaml')
+            print(f"DEBUG: Found base_config (core): {base_config}")
+        except:
+            print("DEBUG: Could not find isaac_ros_nvblox either.")
+
+    # 2. Load Manipulator Config
+    try:
+        manipulator_base_config = lu.get_path('isaac_manipulator_bringup', 'config/nvblox/nvblox_manipulator_base.yaml')
+        print(f"DEBUG: manipulator_base_config: {manipulator_base_config}")
+    except:
+        manipulator_base_config = None
+        print("DEBUG: manipulator_base_config FAILED to load")
+
+    # 3. Load Camera Configs
+    hawk_config = None
+    try:
+        hawk_config = lu.get_path('isaac_manipulator_bringup', 'config/nvblox/specializations/nvblox_manipulator_hawk.yaml')
+    except: pass
+    
+    realsense_config = None
+    try:
+        realsense_config = lu.get_path('isaac_manipulator_bringup', 'config/nvblox/specializations/nvblox_manipulator_realsense.yaml')
+    except: pass
+    
+    isaac_sim_config = None
+    try:
+        isaac_sim_config = lu.get_path('isaac_manipulator_bringup', 'config/nvblox/specializations/nvblox_manipulator_sim.yaml')
+    except: pass
+
+    # 4. Load Workspace Config
+    workspace_config = None
+    try:
+        workspace_config = lu.get_path('isaac_manipulator_bringup', f'config/nvblox/workspace_bounds/{workspace_bounds_name}.yaml')
+        print(f"DEBUG: workspace_config: {workspace_config}")
+    except:
+        print("DEBUG: workspace_config FAILED to load")
+
+    # Select the specific camera config
+    camera_config = None
     if camera_type is CameraType.hawk:
         remappings = get_hawk_remappings(no_robot_mode)
         camera_config = hawk_config
@@ -107,11 +146,26 @@ def add_nvblox(args: lu.ArgumentContainer) -> List[lut.Action]:
         camera_config = isaac_sim_config
     else:
         raise Exception(f'CameraType {camera_type} not implemented.')
+    
+    print(f"DEBUG: Selected camera_config: {camera_config}")
 
-    # Load the workspace config
+    # --- CRITICAL CHECK ---
+    # If any of these are None, the launch WILL crash with 'NoneType not iterable'
+    if base_config is None:
+        raise Exception("CRITICAL: base_config is None. Install 'nvblox_examples_bringup' or 'isaac_ros_nvblox'.")
+    if manipulator_base_config is None:
+        raise Exception("CRITICAL: manipulator_base_config is None.")
+    if camera_config is None:
+        raise Exception("CRITICAL: camera_config is None.")
+    if workspace_config is None:
+        raise Exception(f"CRITICAL: workspace_config is None for setup '{workspace_bounds_name}'.")
+
+    # Load the workspace config validation
     if not os.path.exists(workspace_config):
-        raise Exception(f'Workspace with name {workspace_bounds_name} does not exist. '
-                        'Launching nvblox without valid workspace is not allowed.')
+        raise Exception(f'Workspace file path found but file does not exist: {workspace_config}')
+
+    print("DEBUG: All configs loaded successfully.")
+    print("="*50 + "\n")
 
     # Get all parameters with overrides.
     parameters = []
