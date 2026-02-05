@@ -38,7 +38,7 @@ def generate_launch_description() -> lut.LaunchDescription:
         description='Depth mode for Hawk camera')
     args.add_arg(
         'num_cameras',
-        default=1,
+        default=2,
         choices=['1', '2'],
         cli=True,
         description='Number of cameras to run for 3d reconstruction')

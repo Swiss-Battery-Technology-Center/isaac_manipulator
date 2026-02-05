@@ -42,4 +42,4 @@
       workspace_bounds_type: "unbounded" # ["unbounded", "height_bounds", "bounding_box"]
 
       # esdf integrator
-      esdf_integrator_min_weight: 0.1
+      esdf_integrator_min_weight: 0.2

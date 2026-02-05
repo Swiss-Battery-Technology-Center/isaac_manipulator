@@ -34,8 +34,8 @@ calibrations_dict = {
         'world_pose_realsense_camera_intermediate': {
             'parent_frame': 'world',
             'child_frame': 'camera_intermediate',
-            'translation': [0.6587, 0.5796, 0.6788], 
-            'rotation': [0.2548, 0.8413, -0.4647, -0.1065], # [qx, qy, qz, qw]
+            'translation': [0.6032, 0.5365, 1.0708], 
+            'rotation': [0.0376, 0.9709, -0.2206, -0.0855], # [qx, qy, qz, qw]
         },
         'world_pose_realsense_camera_intermediate1': {
             'parent_frame': 'camera_intermediate',
@@ -55,6 +55,31 @@ calibrations_dict = {
             'translation': [0.0, 0.0, 0.0],
             'rotation': [1.0, 0.0, 0.0, 0.0],  # [qx, qy ,qz, qw]
         },
+        'world_pose_realsense_2_camera_intermediate': {
+            'parent_frame': 'world',
+            'child_frame': 'camera_intermediate_2',
+            'translation': [0.5110, -0.6644, 1.1800],
+            'rotation': [0.9665, 0.0162, -0.0751, -0.2447],
+        },
+        'world_pose_realsense_2_camera_intermediate1': {
+            'parent_frame': 'camera_intermediate_2',
+            'child_frame': 'camera_intermediate_2_1', 
+            'translation': [0.0, 0.0, 0.0],
+            'rotation': [0.0, 0.0, 0.707168, 0.707168],
+        },
+        'world_pose_realsense_2_camera_intermediate2': {
+            'parent_frame': 'camera_intermediate_2_1', 
+            'child_frame': 'camera_intermediate_2_2',
+            'translation': [0.0, 0.0, 0.0],
+            'rotation': [0.707168, 0.0, 0.707168, 0.0],
+        },
+        'world_to_realsense_2': {
+            'parent_frame': 'camera_intermediate_2_2',
+            'child_frame': 'camera_2_link',
+            'translation': [0.0, 0.0, 0.0],
+            'rotation': [1.0, 0.0, 0.0, 0.0],
+        },     
+
     },
     'home': {
         'world_to_base': {
@@ -136,6 +161,7 @@ def add_static_transforms(args: lu.ArgumentContainer) -> List[Action]:
                 'world_to_realsense_1',
                 'world_to_target_frame_1',
                 'world_to_target_frame_2'
+                
             ]
             for key in realsense_keys:
                 if key in transforms:
@@ -145,10 +171,17 @@ def add_static_transforms(args: lu.ArgumentContainer) -> List[Action]:
 
             # If 2 cameras, also load 'world_to_realsense_2' if present
             if num_cameras > 1:
-                if 'world_to_realsense_2' in transforms:
-                    actions.append(static_transform_from_dict(transforms['world_to_realsense_2']))
-                else:
-                    actions.append(lu.log_info(["'world_to_realsense_2' not found. Skipping."]))
+                realsense_2_keys = [
+                    'world_pose_realsense_2_camera_intermediate',
+                    'world_pose_realsense_2_camera_intermediate1',
+                    'world_pose_realsense_2_camera_intermediate2',
+                    'world_to_realsense_2'
+                ]
+                for key in realsense_2_keys:
+                    if key in transforms:
+                        actions.append(static_transform_from_dict(transforms[key]))
+                    else:
+                        actions.append(lu.log_info([f"Transform '{key}' not found. Skipping."]))
                 assert num_cameras <= 2, 'Running more than 2 cameras not allowed.'
         else:
             # If for some reason there's another camera type we haven't covered
